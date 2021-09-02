@@ -1,0 +1,57 @@
+﻿@page "/temperature-sensors"
+
+@using SmartHome.Bluetooth;
+@using SmartHome.Bluetooth.Devices;
+
+@inject AllDevices alldevices
+
+<h1>Czujniki temperatury</h1>
+
+@if (alldevices.TemperatureSensors == null)
+{
+    <p><em>Brak podłączonych czujników temperatury</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Miejsce</th>
+                <th>Temperatura (C)</th>
+                <th>Wilgotność (%)</th>
+                <th>Indeks cieplny</th>
+                <th>Zmień miejsce</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var temperatureSensor in alldevices.TemperatureSensors)
+            {
+                <tr>
+                    <td>@temperatureSensor.Place</td>
+                    <td>@temperatureSensor.Temperature</td>
+                    <td>@temperatureSensor.Humidity</td>
+                    <td>@temperatureSensor.Pressure</td>
+                    <td> <button class="btn-primary btn" type="button" @onclick="()=>ChangePlace(temperatureSensor)">Zmień</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private async Task ChangePlace(TemperatureSensor temperatureSensor)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("temperatureSensor", temperatureSensor);
+        var formModal = Modal.Show<ChangeTemperaturePlace>("Zmiana miejsca", parameters);
+        var result = await formModal.Result;
+
+        if (!result.Cancelled)
+        {
+            StateHasChanged();
+        }
+    }
+}

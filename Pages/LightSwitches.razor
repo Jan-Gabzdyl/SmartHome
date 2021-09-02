@@ -1,0 +1,68 @@
+﻿@page "/light-switches"
+
+@using SmartHome.Bluetooth;
+@using SmartHome.Bluetooth.Devices;
+
+@inject AllDevices alldevices
+
+<h1>Włączniki światła</h1>
+
+@if (alldevices.LightSwitches == null)
+{
+    <p><em>Brak podłączonych włączników światła</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Miejsce</th>
+                <th>Włącznik</th>
+                <th>Zmiana miejsca</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var lightSwitch in alldevices.LightSwitches)
+            {
+                <tr>
+
+                    <td> <h5>@lightSwitch.Place </h5> </td>
+                        @if (lightSwitch.IsOn == true)
+                        {
+                            <td><button class="btn-success btn" type="button" @onclick="() => ChangeSwitch(lightSwitch)">Wyłącz</button></td>
+                        }
+                        else
+                        {
+                            <td><button class="btn-danger btn" type="button" @onclick="() => ChangeSwitch(lightSwitch)">Włącz</button></td>
+                        }
+                    <td> <button class="btn-primary btn" type="button" @onclick="() => ChangePlace(lightSwitch)">Zmień</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+
+ [CascadingParameter] public IModalService Modal { get; set; }
+
+    private async Task ChangePlace(LightSwitch lightSwitch)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("lightSwitch", lightSwitch);
+        var formModal = Modal.Show<ChangeSwitchPlace>("Zmiana miejsca", parameters);
+        var result = await formModal.Result;
+
+        if (!result.Cancelled)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task ChangeSwitch(LightSwitch lightSwitch)
+    {
+        await lightSwitch.ChangeState();
+        StateHasChanged();
+    }
+}

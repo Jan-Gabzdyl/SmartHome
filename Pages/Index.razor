@@ -1,0 +1,11 @@
+@page "/"
+
+@using SmartHome.Bluetooth;
+
+@inject AllDevices allDevices
+
+<h1>Inteligentny dom</h1>
+<br />
+<h3> liczba podłączonych urządzeń: @(allDevices.TemperatureSensors.Count + allDevices.LightSwitches.Count)</h3>
+<h3> liczba podłączonych czujników temperatury: @allDevices.TemperatureSensors.Count</h3>
+<h3> liczba podłączonych włączników światka: @allDevices.LightSwitches.Count</h3>

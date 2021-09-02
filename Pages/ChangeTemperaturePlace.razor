@@ -1,0 +1,49 @@
+@using SmartHome.Bluetooth.Devices
+@using System.ComponentModel.DataAnnotations;
+
+
+<EditForm Model="@form" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <ValidationMessage For="@(() => form.Place)" />
+        <label>Nazwa koloru</label>
+        <InputText placeholder="Podaj nazwę miejsca" id="name" class="form-control form-control-lg" @bind-Value="form.Place" />
+    </div>
+    <br />
+    <button class="btn-primary btn-lg" type="submit">Zmień</button>
+    <button class="btn-secondar btn-lg" type="button" @onclick="CancelClick">Anuluj</button>
+</EditForm>
+
+
+@code
+{
+
+    class Form
+    {
+        [Required(ErrorMessage = "To pole nie może być puste")]
+        [StringLength(50, ErrorMessage = "Podana nazwa jest za długa")]
+        public string Place { get; set; }
+    }
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public TemperatureSensor temperatureSensor { get; set; }
+
+    private Form form = new Form();
+
+    protected async override Task OnInitializedAsync()
+    {
+        form.Place = temperatureSensor.Place;
+        StateHasChanged();
+    }
+
+    private async void HandleValidSubmit()
+    {
+        await temperatureSensor.WriteNewPlace(form.Place);
+        await ModalInstance.CloseAsync();
+    }
+
+    private void CancelClick()
+    {
+        ModalInstance.CancelAsync();
+    }
+}
